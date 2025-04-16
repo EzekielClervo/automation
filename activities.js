@@ -1,9 +1,7 @@
-Logreretivities.js - Activity logging for Facebook Automation Suite
-
+/**
+ * activities.js - Activity logging for Facebook Automation Suite
+ */
 const { db } = require('./db');
-const { activities } = require('./schema');
-const chalk = require('chalk');
-const { eq } = require('drizzle-orm');
 
 /**
  * Log an activity in the database
@@ -15,17 +13,18 @@ const { eq } = require('drizzle-orm');
  */
 async function logActivity(userId, activityType, targetId, details = null) {
   try {
-    await db.insert(activities).values({
-      user_id: userId,
-      activity_type: activityType,
-      target_id: targetId,
-      details
-    });
+    const timestamp = new Date();
     
-    console.log(chalk.green(`Activity logged: ${activityType}`));
+    // Insert activity into database
+    await db.query(
+      'INSERT INTO activities (user_id, activity_type, target_id, details, timestamp) VALUES ($1, $2, $3, $4, $5)',
+      [userId, activityType, targetId, details, timestamp]
+    );
+    
+    console.log(`Activity logged: ${activityType} on ${targetId}`);
     return true;
   } catch (error) {
-    console.log(chalk.red(`Failed to log activity: ${error.message}`));
+    console.error('Error logging activity:', error.message);
     return false;
   }
 }
@@ -38,15 +37,14 @@ async function logActivity(userId, activityType, targetId, details = null) {
  */
 async function getRecentActivities(userId, limit = 10) {
   try {
-    const result = await db.select()
-      .from(activities)
-      .where(eq(activities.user_id, userId))
-      .orderBy(activities.created_at, 'desc')
-      .limit(limit);
+    const result = await db.query(
+      'SELECT * FROM activities WHERE user_id = $1 ORDER BY timestamp DESC LIMIT $2',
+      [userId, limit]
+    );
     
-    return result;
+    return result.rows;
   } catch (error) {
-    console.log(chalk.red(`Failed to get recent activities: ${error.message}`));
+    console.error('Error getting recent activities:', error.message);
     return [];
   }
 }
@@ -54,5 +52,4 @@ async function getRecentActivities(userId, limit = 10) {
 module.exports = {
   logActivity,
   getRecentActivities
- };
 };
