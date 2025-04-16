@@ -4,7 +4,7 @@ services:
   - type: web
     name: facebook-automation-suite
     env: node
-    plan: starter
+    plan: free
     buildCommand: npm install
     startCommand: node index.js
     healthCheckPath: /
@@ -17,6 +17,6 @@ services:
   # Database configuration
 databases:
   - name: facebook_automation_db
-    plan: starter
+    plan: free
     databaseName: facebook_automation_db
     user: facebook_automation_user
