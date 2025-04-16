@@ -54,4 +54,5 @@ async function getRecentActivities(userId, limit = 10) {
 module.exports = {
   logActivity,
   getRecentActivities
+ };
 };
