@@ -1,35 +1,38 @@
-// schema.js - Database schema for Facebook Automation Suite
+/**
+ * Database schema definitions for Facebook Automation Suite
+ * This file defines the structure of database tables
+ */
 
-const { pgTable, serial, text, timestamp } = require('drizzle-orm/pg-core');
+// Define user table schema
+const userSchema = {
+  id: "SERIAL PRIMARY KEY",
+  username: "VARCHAR(255) NOT NULL UNIQUE",
+  password_hash: "VARCHAR(255) NOT NULL",
+  email: "VARCHAR(255)",
+  created_at: "TIMESTAMP DEFAULT CURRENT_TIMESTAMP"
+};
 
-// Users table - Store user data
-const users = pgTable('users', {
-  id: serial('id').primaryKey(),
-  email: text('email').notNull(),
-  password: text('password').notNull(), // In production, should be hashed
-  created_at: timestamp('created_at').defaultNow()
-});
+// Define token table schema
+const tokenSchema = {
+  id: "SERIAL PRIMARY KEY",
+  user_id: "INTEGER REFERENCES users(id)",
+  token: "TEXT NOT NULL",
+  created_at: "TIMESTAMP DEFAULT CURRENT_TIMESTAMP"
+};
 
-// Tokens table - Store Facebook access tokens
-const tokens = pgTable('tokens', {
-  id: serial('id').primaryKey(),
-  user_id: serial('user_id').references(() => users.id),
-  access_token: text('access_token').notNull(),
-  created_at: timestamp('created_at').defaultNow()
-});
+// Define activity table schema
+const activitySchema = {
+  id: "SERIAL PRIMARY KEY",
+  user_id: "INTEGER REFERENCES users(id)",
+  activity_type: "VARCHAR(50) NOT NULL",
+  target_id: "VARCHAR(255) NOT NULL",
+  details: "TEXT",
+  timestamp: "TIMESTAMP DEFAULT CURRENT_TIMESTAMP"
+};
 
-// Activities table - Store activity logs
-const activities = pgTable('activities', {
-  id: serial('id').primaryKey(),
-  user_id: serial('user_id').references(() => users.id),
-  activity_type: text('activity_type').notNull(), // 'post_reaction', 'comment_reaction', 'post_comment', 'follow', 'unfollow', 'share'
-  target_id: text('target_id').notNull(), // ID of the post, comment, or user
-  details: text('details'), // Additional details (e.g., reaction type, comment content)
-  created_at: timestamp('created_at').defaultNow()
-});
-
+// Export all schemas
 module.exports = {
-  users,
-  tokens,
-  activities
+  userSchema,
+  tokenSchema,
+  activitySchema
 };
