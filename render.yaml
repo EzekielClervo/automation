@@ -1,0 +1,22 @@
+# Render.yaml configuration file
+services:
+  # A Node.js web service with PostgreSQL database
+  - type: web
+    name: facebook-automation-suite
+    env: node
+    plan: starter
+    buildCommand: npm install
+    startCommand: node index.js
+    healthCheckPath: /
+    envVars:
+      - key: DATABASE_URL
+        fromDatabase:
+          name: facebook_automation_db
+          property: connectionString
+
+  # Database configuration
+databases:
+  - name: facebook_automation_db
+    plan: starter
+    databaseName: facebook_automation_db
+    user: facebook_automation_user
